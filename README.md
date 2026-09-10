@@ -1,62 +1,66 @@
-# Image colorization with pix2pix (pix2pix를 활용한 이미지 색상화)
+<div align="center">
+
+# 🎨 Gray → Color
+
+### Image Colorization with pix2pix
+
+Restoring grayscale photographs into natural, lifelike color images<br/>
+with a U-Net Generator + PatchGAN Discriminator.
+
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![Flask](https://img.shields.io/badge/Flask-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![Colab](https://img.shields.io/badge/Google%20Colab-F9AB00?logo=googlecolab&logoColor=white)](https://colab.research.google.com/)
+
+**English** · [한국어](README.ko.md)
+
+<img src="https://github.com/user-attachments/assets/fc5eb83b-0ff9-4a00-bc1e-e18c08d8fde8" width="900" />
+
+</div>
+
 ---
 
+## 📑 Table of Contents
 
-# CONTENTS
+| Section | Description |
+|---|---|
+| [Motivation](#-motivation) | Why this topic was chosen |
+| [Objective](#-objective) | What the project aims to build |
+| [Pipeline](#-pipeline) | End-to-end workflow |
+| [Dataset](#-dataset) | Data collection, EDA, preprocessing |
+| [Model Architecture](#-model-architecture) | Why pix2pix, and how it works |
+| [Analysis & Improvement](#-analysis--improvement) | Diagnosing failures and fixing them |
+| [Results](#-results) | Quantitative and subjective comparison |
+| [Web Demo](#-web-demo-huerevive) | Flask service and how to run it |
+| [Project Structure](#-project-structure) | Files in this repository |
+| [Limitations & Future Work](#%EF%B8%8F-limitations--future-work) | What is left to solve |
+| [Expected Impact](#-expected-impact) | Value of the outcome |
 
-
-* **Motivation** : 프로젝트의 주제 선정 및 배경
-
-  
-* **Dataset** : 프로젝트에 사용한 데이터 셋 소개
-
-  
-* **Model Architecture** : pix2pix 모델 
-
-
-* **Model Analysis** : 모델 분석 결과
-
-  
-* **Model Improvement** : 분석 결과를 토대로 모델 성능 향상
-
-
-* **Service deploy** : 서비스 방안 소개
-
-
-* **future works** : 향후 계획
 ---
 
+## 💡 Motivation
 
-# Motivation
+As AI matures, demand for **digitally restoring historical records** keeps growing.
 
-최근 AI 기술의 발달로 과거의 기록물들을 디지털로 복원하려는 수요가 증가하고 있음
+Grayscale photographs are limited in how much information and emotion they can convey. Adding color raises visual comprehension, immersion, and vividness — but doing it by hand is **slow and expensive**.
 
-흑백 사진은 정보 전달력과 감성 전달 측면에서 한계를 가지며, 이를 색상화 함으로써 시각적 이해도와 몰입도와 생동감을 높일 수 있음
+This project therefore explores a **deep-learning approach to colorization** that is far more efficient in time and cost than manual work. To ensure the restored images look natural, the model is judged not only by pixel-level similarity metrics but also by **subjective human evaluation**.
 
-하지만 기존의 수작업으로 진행되던 색상화 방식은 시간과 비용이 많이 듬
-
-이에 본 프로젝트에서는 기존의 색상화 작업보다 시간과 비용 측면에서 효율적인 딥러닝을 이용한 색상화 방식에 대해 연구를 진행
-  
-자연스러운 복원 결과를 위해 시각적 유사성을 평가하는 성능 평가 지표 뿐만 아니라 사용자 주관적 평가도 함께 고려함
-
-이를 통해 역사적 기록물, 사진 복원, 교육용 자료등 다양한 분야에 활용할 수 있으며, 더나아가 개인의 소중한 기억의 한 조각을 찾는 효과를 기대할 수 있음 
+The result can be applied to historical archives, photo restoration, and educational material — and, more personally, to recovering a cherished fragment of someone's memory.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/4c2ef17c-7355-46f5-8ad2-bebae5f75b61" width="700" />
 </p>
 
+---
 
---- 
+## 🎯 Objective
 
-# **Project object**
+> Build an AI system that uses a deep-learning model to restore grayscale photographs into **natural, photorealistic color images**.
 
-**프로젝트 목표:** 딥러닝 모델을 활용한 흑백 사진을 자연스럽고 실사에 가까운 컬러 이미지로 복원하는 AI 시스템 구현
+---
 
-
---- 
-
-
-# **Flowchart** 
+## 🔄 Pipeline
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/4d278af9-5f86-477f-bb96-d5dcee76fed9" width="700" />
@@ -64,196 +68,264 @@
 
 ---
 
+## 📂 Dataset
 
-# Dataset
+### 1. Collection
 
-## 데이터 전처리 과정 및 순서
+Paired image datasets covering a wide range of subjects — landscapes, people, animals, flowers, food, and more.
 
-I. 데이터 셋 수집
+### 2. Composition
 
-- 다양한 쌍 이미지 기반의 이미지 데이터 셋 수집 (다양한 풍경, 인물, 동물, 꽃, 음식 등)
+| Split | Color | Grayscale |
+|:---|:---:|:---:|
+| **Train** | 1,500 | 1,500 |
+| **Validation** | 100 | 100 |
+| **Test** | — | 150 |
 
-II. 데이터 EDA (탐색적 데이터 분석) 
+### 3. EDA
 
--  EDA 이후, 최종 데이터 셋 결정 
--  최종 데이터 셋 결정 후 프로젝트에 쓰이는 데이터 셋 생성
--  **데이터셋 구성** [Train (color 1500 : gray-scale 1500)] : [Validation (color 100 : gray-scale 100)] : Test [gray-scale 150]
+Height / width distribution of the grayscale and color sets:
 
-III. EDA 분석 
-
-- 컬러 이미지 데이터와 흑백 이미지 데이터 높이(Height)와 너비(width) 분포
-
-| Gray-scale img EDA | Color img EDA |
+| Grayscale image EDA | Color image EDA |
 |---------|---------|
-| <img src= "https://github.com/user-attachments/assets/c6f8657a-f4f0-4979-ba07-77073cb719b3" width="550" height="420" /> | <img src= "https://github.com/user-attachments/assets/f89caa2f-705a-43a0-98b6-4a7c5fbc8bd9" width="550" height="420" /> |
+| <img src="https://github.com/user-attachments/assets/c6f8657a-f4f0-4979-ba07-77073cb719b3" width="550" height="420" /> | <img src="https://github.com/user-attachments/assets/f89caa2f-705a-43a0-98b6-4a7c5fbc8bd9" width="550" height="420" /> |
 
-- Color 이미지 데이터의 RGB channel 분포
+RGB channel distribution of the color images:
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/cd87f8b7-a9b7-462c-aece-c277cec31b6b" width="700" />
 </p>
 
-**컬러 이미지**와 **흑백 이미지** 모두 **150×150 크기**의 정사각형 이미지 데이터
+**Findings**
 
-**컬러 이미지**에서 **R, G, B** 세 채널 모두 대체로 균일하게 분포되어 색상의 균형이 잘 맞춰져있음
+- Both color and grayscale images are square, **150 × 150** throughout.
+- The **R, G, B** channels are all distributed fairly evenly, so the color balance is healthy.
 
-IV. 데이터 전처리 
+### 4. Preprocessing
 
-- 모든 이미지가 동일한 크기를 가지므로 모델 학습에 앞서 별도의 리사이징 과정 및 이미지 데이터 전처리 과정이 필요하지 않음
-
----
-
-# Model Architecture  
-
-**Pix2Pix** 
-
-## Pix2Pix - U-Net based Generator + PatchGAN Discriminator
-
-<p align="center">
-<img src="https://github.com/user-attachments/assets/92efdf19-051b-421b-9006-aa8322b542e5" width="700" height="400" />
-</p>
-
-## Pix2Pix 모델 선정 배경 및 구조
-
-## Pix2Pix 모델 선정 배경
-
-**1. 흑백 이미지 → 컬러 이미지 색상화 픽셀 단위의 정밀한 매핑이 필요한 image-to-image translation 문제** 
-
-**2. U-Net 구조는 인코더(압축)와 디코더(복원) 사이에 skip connection이 있음 → 저수준의 공간 정보를 고해상도로 정확히 복원할 수 있음**
-
-**3. U-Net 구조 덕분에 색상화 시 중요한 윤곽선, 질감, 경계 정보가 잘 유지됨**
-
-**4. 일반적인 Discriminator는 이미지 전체를 보고 Real/Fake를 구분**
-
-**5. 색상화 문제에서는 국소 영역(작은 패치)의 색 배치나 질감이 자연스러운지가 더 중요함**
-
-**6. PatchGAN은 전체 이미지를 하나로 처리하지 않고, 공통된 소형 CNN 필터를 반복 적용하여 패치를 평가함 → 모델 파라미터 수가 적고 속도도 빠르며, 학습이 안정적임**
-
-**<결론>** U-Net based Generator와 PatchGAN Discriminator가 결합된 구조인 pix2pix 모델을 선정 
-
-## U-Net based Generator
-
-**1. 인코더(encoder) 부분에서 입력 이미지가 점점 축소되며 특징을 추출함** 
-
-**2. 디코더(decoder) 부분에서 이미지에 대한 해상도를 다시 복원함**
-
-**3. 점선으로 이어진 화살표는 입력 정보와 출력 정보를 직접 연결하는 U-Net의 핵심인 스킵 커넥션이며, 저수준 정보를 고수준 레이어에 직접 전달해 디테일 유지함**
-
-## Patch GAN Discriminator
-
-**1. U-Net 기반의 Generator (T) 부분에서 생성한 결과 이미지인 T(x)와 정답 이미지인 Ground Truth y 두개의 이미지 이용해 판별에 사용** 
-
-**2. CNN 기반으로 점점 공간의 크기를 줄여가며 특징 추출을 하며, P1, P2, P3, P4의 여러 단계에서 T(x)와 Ground Truth y 쌍의 정합성을 확인함**
-
-**3. 마지막 출력에서 실제 이미지인지, Generator가 만든 가짜 이미지인지 판단**
-
-**4. 판별 결과를 바탕으로 Generator는 더 정답과 비슷한 T(x)를 만들도록 학습됨**
+Because every image already shares the same resolution, **no separate resizing or additional preprocessing** was required before training.
 
 ---
 
-# Model Analysis 
+## 🧠 Model Architecture
 
-## 모델의 문제점
+### pix2pix — U-Net Generator + PatchGAN Discriminator
 
 <p align="center">
-<img src= "https://github.com/user-attachments/assets/75ccf1ca-92ff-4786-a7ea-92f09f820bd6" width="700" height="400" />
+  <img src="https://github.com/user-attachments/assets/92efdf19-051b-421b-9006-aa8322b542e5" width="700" height="400" />
 </p>
 
-**1.** 결과 이미지(Result Image)가 원본 이미지와 비교했을 때 품질이 좋지 않음
+### Why pix2pix?
 
-**2.** 성능지표 또한 수치가 높게 나오지 않음
+| # | Reason |
+|:---:|---|
+| 1 | Grayscale → color is an **image-to-image translation** problem that needs precise pixel-level mapping. |
+| 2 | U-Net places **skip connections** between the encoder (compression) and the decoder (reconstruction), so low-level spatial information is restored accurately at high resolution. |
+| 3 | Thanks to that structure, the **edges, textures, and boundaries** that matter most in colorization are preserved. |
+| 4 | A conventional discriminator judges real/fake by looking at the **whole image** at once. |
+| 5 | In colorization, what matters more is whether the color layout and texture of **local patches** look natural. |
+| 6 | PatchGAN instead applies a small shared CNN filter repeatedly across patches → **fewer parameters, faster, and more stable to train**. |
 
-**성능지표(Evaluation metrix)**
+> **Conclusion:** pix2pix, which combines a U-Net Generator with a PatchGAN Discriminator, was selected.
 
-**1. PSNR** - Peak Signal-to-noise ratio
+### U-Net Generator
 
-**2. SSIM** - Structural Similarity Index Measure
+1. In the **encoder**, the input image is progressively downsampled while features are extracted.
+2. In the **decoder**, the resolution is progressively restored.
+3. The dashed arrows are the **skip connections** at the heart of U-Net. They pass low-level information straight to the higher layers so fine detail survives.
 
-**3. LPIPS** – Learned Perceptual Image Patch Similarity
+*Implementation: 8 down-blocks (64 → 512) and 8 up-blocks, dropout 0.5 on the first three up-blocks, `Tanh` output, 1-channel input → 3-channel output.*
 
-**4. FID** - Fréchet inception distance
+### PatchGAN Discriminator
 
-## 모델의 성능 저하의 원인
+1. Takes both the generated image `T(x)` and the ground truth `y` as the basis for its judgment.
+2. Being CNN-based, it shrinks the spatial size step by step while extracting features, checking the consistency of the `T(x)` / `y` pair at several stages (**P1–P4**).
+3. The final output decides whether the image is real or was produced by the generator.
+4. Using that verdict, the generator learns to produce a `T(x)` closer to the ground truth.
 
-**1. 하이퍼 파라미터 조정** : PSNR, SSIM이 모두 낮고 LPIPS, FID이 모두 높다면 학습이 부족하다는 의미임 (현재 epoch 10회)
+---
 
-**2. G_LOSS** - 학습 결과 Discriminator의 loss가 일정하게 낮은 반면, Generator의 loss는 epoch이 증가하여도 감소하지 않고 높은 수준(10 ~ 12)에서 진동함
+## 🔬 Analysis & Improvement
 
-| Evaluation Matrix | LOSS Graph |
+### Problems with the baseline model
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/75ccf1ca-92ff-4786-a7ea-92f09f820bd6" width="700" height="400" />
+</p>
+
+1. The result image is **noticeably lower in quality** than the original.
+2. The **evaluation metrics** also came out weak.
+
+**Evaluation metrics used**
+
+| Metric | Full name | Direction |
+|:---|:---|:---:|
+| **PSNR** | Peak Signal-to-Noise Ratio | ↑ higher is better |
+| **SSIM** | Structural Similarity Index Measure | ↑ higher is better |
+| **LPIPS** | Learned Perceptual Image Patch Similarity | ↓ lower is better |
+| **FID** | Fréchet Inception Distance | ↓ lower is better |
+
+### Root causes
+
+1. **Insufficient training.** PSNR and SSIM were both low while LPIPS and FID were both high — the signature of undertraining (only 10 epochs at that point).
+2. **Generator loss never converged.** The discriminator loss stayed consistently low, while the generator loss kept oscillating at a high level (**10–12**) no matter how many epochs passed: the discriminator had overpowered the generator.
+
+| Evaluation metrics | Loss graph |
 |---------|---------|
-| <img src= "https://github.com/user-attachments/assets/358dd685-c8a1-47c1-81fa-5069cb44206d" width="550" height="420" /> | <img src= "https://github.com/user-attachments/assets/f6f4919b-dbac-46fc-a46d-7c7078365128" width="550" height="420" /> |
+| <img src="https://github.com/user-attachments/assets/358dd685-c8a1-47c1-81fa-5069cb44206d" width="550" height="420" /> | <img src="https://github.com/user-attachments/assets/f6f4919b-dbac-46fc-a46d-7c7078365128" width="550" height="420" /> |
 
-# Model Improvement
+### Improvements
 
-**1. 하이퍼 파라미터 조정** : epoch 50회, early-stopping, Learning rate 조정
+1. **Hyperparameter tuning** — 50 epochs, early stopping, and a lowered learning rate.
+2. **Delayed discriminator training** — the discriminator is only updated from **epoch 8 onward**, and then only every 3rd step. Holding it back early gives the generator room to stabilize before it has to face a strong critic.
 
-**2. G_LOSS** - Generator가 충분히 학습할 시간을 확보, 8번째 epoch 이후부터 Discriminator를 학습시킴 -> 초반에 Discriminator 학습을 막아 Generator가 더 안정적으로 학습 초기화 가능하게 함
-
-| Improve Evaluation Matrix | Improve LOSS Graph |
+| Improved evaluation metrics | Improved loss graph |
 |---------|---------|
-| <img src= "https://github.com/user-attachments/assets/a6e3338f-b729-4d04-b2ea-1c3ab0f3ae26" width="550" height="420" /> | <img src= "https://github.com/user-attachments/assets/31b2f404-0173-4082-9645-940656137a9a" width="550" height="420" /> |
+| <img src="https://github.com/user-attachments/assets/a6e3338f-b729-4d04-b2ea-1c3ab0f3ae26" width="550" height="420" /> | <img src="https://github.com/user-attachments/assets/31b2f404-0173-4082-9645-940656137a9a" width="550" height="420" /> |
 
-# Image Colorization Performance Comparison
+### Configuration: baseline vs. improved
 
-<p align="center">
-<img src= "https://github.com/user-attachments/assets/fc5eb83b-0ff9-4a00-bc1e-e18c08d8fde8" width="900" height="400" />
-</p>
-
-**생각할 점: Iil posed problem**
-모델의 성능이좋다고 결과 이미지의 성능이 좋아지는것이 아님
-
-따라서 사용자의 주관적 평가에 초점을 두기도 함
-
-이번에 시도한 프로젝트에서는 운이 좋게도 성능이 가장 좋은 모델에서 나온 결과 이미지가 사용자 주관적 평가에서도 좋은 평가를 받음
-
-<p align="center">
-<img src= "https://github.com/user-attachments/assets/8ed6cdff-9e64-4666-8568-a73cf7184723" width="900" height="200" />
-</p>
-
-# Service deploy
-
-<p align="center">
-<img src= "https://github.com/user-attachments/assets/9ab66b7d-0d88-4310-9efc-6514ff7f64ef" width="800" height="400" />
-</p>
-
-파이썬 기반의 마이크로 웹 프레임워크인 **FLASK** 를 이용해 웹페이지를 개발하여 서비스 방안을 구상
+| Setting | Baseline | Improved |
+|:---|:---|:---|
+| Epochs | 10 | 50 (early stopping, patience 10) |
+| Learning rate | 5e-4 (G / D) | 5e-5 (G / D) + `ReduceLROnPlateau` (factor 0.5, patience 3) |
+| Batch size | 16 | 16 |
+| Optimizer | Adam | Adam (β = 0.5, 0.999) |
+| Generator loss | BCE + L1 | BCE + **30 ×** L1 + **5 ×** VGG19 perceptual loss |
+| Discriminator update | every step, from epoch 1 | from **epoch 8**, every 3rd step |
+| Labels | hard 0 / 1 | one-sided smoothing — real `U(0.8, 1.0)`, fake `U(0.0, 0.2)` |
+| Seed | 42 | 42 |
 
 ---
 
-# 프로젝트의 한계 및 Future works
-
----
-**프로젝트의 한계**
+## 📊 Results
 
 <p align="center">
-<img src= "https://github.com/user-attachments/assets/8e719aa3-b714-458c-ace8-d7eac8a301e7" width="800" height="200" />
+  <img src="https://github.com/user-attachments/assets/fc5eb83b-0ff9-4a00-bc1e-e18c08d8fde8" width="900" height="400" />
 </p>
 
-* 학습되지 않은 이미지 데이터에 대한 색상화를 하지 못함 -> 학습 이미지 데이터 부족
+### A note on the ill-posed nature of the task
 
+> **Better metrics do not automatically mean a better-looking image.**
 
-**1. 학습 데이터 추가 및 증강 시도**
+Colorization is an **ill-posed problem**: one grayscale input has many plausible color solutions. That is why **subjective human evaluation** deserves as much weight as the numbers do.
 
-학습 데이터의 양과 다양성을 확장하여 모델의 일반화 성능 향상 그리고 보다 다양한 장면, 조명, 피사체 등을 포함하는 이미지 수집하여 복잡한 컬러화 상황 대응력 강화
+In this project we were fortunate — the model with the best metrics also produced the images that scored highest in subjective evaluation.
 
-**2. 평가 지표 및 주관적 평가 보완**
-
-사용자 주관적 평가 데이터를 축적하여 실제로 서비스를 이용하는 사용자 관점의 품질 평가 반영
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8ed6cdff-9e64-4666-8568-a73cf7184723" width="900" height="200" />
+</p>
 
 ---
 
-# 기대효과
+## 🌐 Web Demo (HueRevive)
 
-**1. 역사적 가치의 복원과 대중화**
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/9ab66b7d-0d88-4310-9efc-6514ff7f64ef" width="800" height="400" />
+</p>
 
-흑백 사진·영상을 컬러로 전환함으로써 과거가 더욱 현실감 있게 다가오며, 역사의 생생한 감각을 느낄 수 있음
+The service was prototyped as a web page built with **Flask**, a Python micro web framework.
+A user uploads a grayscale image, **three trained generators** each colorize it, and the user picks whichever result they prefer.
 
-단절된 시간 속 인물과 공간에 감정을 이입하게 함으로써 공감과 관심을 이끌어내어 사람들의 역사적 거리감을 해소할 수 있음
+### Quick start
 
-**2. 심리적·정서적 기대효과**
+```bash
+# 1. Install dependencies
+pip install torch torchvision flask pillow
 
-개인의 추억, 기억 또는 감정을 자극하여 향수와 감동을 유도할 수 있음
+# 2. Place the trained weights
+#    HueRevive/saved_models/best_generator_1.pth
+#    HueRevive/saved_models/best_generator_2.pth
+#    HueRevive/saved_models/best_generator_3.pth
 
-**3. 기록 보존 및 연구 자료 활용**
+# 3. Run the server
+cd HueRevive
+python app.py
+```
 
-복원된 컬러 이미지들이 다양한 분야에서 인공지능 연구·개발에 유용한 자료가 됨
+Then open **http://127.0.0.1:5000** in a browser.
+
+### Flow
+
+```
+Upload a grayscale image
+        ↓
+Convert to L (grayscale) → resize to 256×256 → normalize to [-1, 1]
+        ↓
+Inference with 3 generators
+        ↓
+Denormalize → save as PNG → present the 3 candidates
+        ↓
+User selects the final image
+```
+
+> ⚠️ **Note** — `app.py` runs with `debug=True`, and the demo login credentials and `secret_key` are hard-coded inside it. Replace both and disable debug mode before deploying anywhere real.
+> The `saved_models/*.pth` weights and the `templates/` · `static/` assets are not committed to this repository.
+
+---
+
+## 📁 Project Structure
+
+```
+Gray-to-color-colorization-pix2pix-based/
+├── README.md                                   # English (this file)
+├── README.ko.md                                # Korean
+├── 흑백 이미지 컬러 복원 색상화 A 모델.ipynb      # Training / evaluation notebook (Colab)
+└── HueRevive/                                  # Flask web service
+    ├── app.py                                  # Routes: upload, inference, result selection
+    └── colorize_model.py                       # U-Net Generator + inference logic
+```
+
+### Notebook contents
+
+| Step | Description |
+|:---:|---|
+| 1 | Mount Google Drive, fix the random seed (42) |
+| 2 | Build the dataset and the `DataLoader` |
+| 3 | Define the U-Net Generator and the PatchGAN Discriminator |
+| 4 | Baseline training (10 epochs) |
+| 5 | Improved training (50 epochs, perceptual loss, delayed discriminator, early stopping) |
+| 6 | Inference on the test set, results upscaled to 512×512 |
+| 7 | Evaluation with PSNR / SSIM / LPIPS / FID |
+
+---
+
+## ⚠️ Limitations & Future Work
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8e719aa3-b714-458c-ace8-d7eac8a301e7" width="800" height="200" />
+</p>
+
+**Limitation** — The model fails to colorize kinds of images it never saw during training, because the training set was too small.
+
+**1. Add and augment training data**
+
+Expand the volume and variety of the training set to improve generalization, and collect images spanning more scenes, lighting conditions, and subjects so the model can handle harder colorization cases.
+
+**2. Strengthen evaluation, both metric and subjective**
+
+Accumulate subjective evaluation data so that quality is measured from the perspective of the people actually using the service.
+
+---
+
+## ✨ Expected Impact
+
+**1. Restoring and popularizing historical value**
+
+Turning black-and-white photos and footage into color makes the past feel present, letting people experience history vividly. Drawing empathy for people and places separated from us by time closes the emotional distance to history.
+
+**2. Psychological and emotional value**
+
+Personal memories and emotions are stirred, evoking nostalgia and genuine feeling.
+
+**3. Archival preservation and research material**
+
+The restored color images become useful data for AI research and development across many fields.
+
+---
+
+<div align="center">
+
+**Konyang University** · AI Project
+
+</div>
